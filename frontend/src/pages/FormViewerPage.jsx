@@ -15,7 +15,9 @@ const FormViewerPage = () => {
   useEffect(() => {
     const fetchForm = async () => {
       try {
-        const response = await axios.get(`/api/forms/${formId}`); // Use a relative path
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/api/forms/${formId}`
+        );
         setForm(response.data);
       } catch (err) {
         setError(
@@ -142,9 +144,9 @@ const FormViewerPage = () => {
     e.preventDefault();
     setIsSubmitting(true);
     const submissionPromise = axios.post(
-      `/api/forms/${formId}/submit`,
+      `${import.meta.env.VITE_API_BASE_URL}/api/forms/${formId}/submit`,
       submission
-    ); // Use a relative path
+    );
 
     toast.promise(submissionPromise, {
       loading: "Submitting...",

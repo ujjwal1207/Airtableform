@@ -2,7 +2,7 @@ import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 
-const AIRTABLE_AUTH_URL = '/auth/airtable'; // Use a relative path
+const AIRTABLE_AUTH_URL = `${import.meta.env.VITE_API_BASE_URL}/auth/airtable`;
 
 const Navbar = () => {
   const { user, logout, loading } = useAuth();

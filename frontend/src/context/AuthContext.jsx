@@ -5,7 +5,7 @@ import axios from 'axios';
 const AuthContext = createContext(null);
 
 const api = axios.create({
-  baseURL: '/', // Use a relative path
+  baseURL: import.meta.env.VITE_API_BASE_URL, // Use environment variable
   withCredentials: true,
 });
 

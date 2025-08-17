@@ -61,8 +61,6 @@ app.use((err, req, res, next) => {
   res.status(500).send('Something broke!')
 })
 
-// app.listen(PORT, () => {
-//   console.log(`Backend server is running on http://localhost:${PORT}`)
-// })
-
-module.exports = app; 
+app.listen(PORT, () => {
+  console.log(`Backend server is running on http://localhost:${PORT}`)
+})
