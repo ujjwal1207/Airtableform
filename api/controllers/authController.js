@@ -40,14 +40,6 @@ exports.getCurrentUser = (req, res) => {
   });
 };
 
-router.get(
-  '/airtable/callback',
-  passport.authenticate('airtable', { 
-    failureRedirect: `${process.env.FRONTEND_URL}/?login=failed` 
-  }),
-  authController.handleCallback
-);
-
 /**
  * Clears the JWT cookie to log the user out.
  */
