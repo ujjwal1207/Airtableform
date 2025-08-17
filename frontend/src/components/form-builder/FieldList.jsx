@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 
-const FieldList = ({ table, onFieldsFetched, onAddField }) => {
+const FieldList = ({ table, onAddField }) => {
   const { api } = useAuth();
   const [fields, setFields] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -14,7 +14,6 @@ const FieldList = ({ table, onFieldsFetched, onAddField }) => {
       try {
         const response = await api.get(`/api/airtable/fields/${table.baseId}/${table.id}`);
         setFields(response.data.fields);
-        onFieldsFetched(response.data.fields);
       } catch (error) {
         console.error("Failed to fetch fields:", error);
       } finally {
@@ -23,7 +22,7 @@ const FieldList = ({ table, onFieldsFetched, onAddField }) => {
     };
 
     fetchFields();
-  }, [table, api, onFieldsFetched]);
+  }, [table, api]);
 
   if (isLoading) {
     return <p className="text-gray-500">Loading fields...</p>;

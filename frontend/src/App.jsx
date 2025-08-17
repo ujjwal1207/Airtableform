@@ -5,6 +5,8 @@ import Navbar from './components/Navbar';
 import DashboardPage from './pages/DashboardPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import FormBuilderPage from './pages/FormBuilderPage'; // Import the new page
+import FormViewerPage from './pages/FormViewerPage';
+import FormEditPage from './pages/FormEditPage';
 
 function App() {
   return (
@@ -15,6 +17,7 @@ function App() {
           <Routes>
             {/* Public Route */}
             <Route path="/" element={<HomePage />} />
+            <Route path="/form/:formId" element={<FormViewerPage />} />
             
             {/* Protected Routes */}
             <Route 
@@ -25,11 +28,10 @@ function App() {
               path="/builder/new" 
               element={<ProtectedRoute><FormBuilderPage /></ProtectedRoute>} 
             />
-            {/* We will add the edit route later */}
-            {/* <Route 
+            <Route 
               path="/builder/edit/:formId" 
-              element={<ProtectedRoute><FormBuilderPage /></ProtectedRoute>} 
-            /> */}
+              element={<ProtectedRoute><FormEditPage /></ProtectedRoute>} 
+            />
           </Routes>
         </main>
       </div>

@@ -1,14 +1,15 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import AirtableSelector from '../components/form-builder/AirtableSelector';
 import FieldList from '../components/form-builder/FieldList';
 import QuestionEditor from '../components/form-builder/QuestionEditor';
 import LogicBuilder from '../components/form-builder/LogicBuilder'; // Import the new modal
 
-const FormBuilderPage = () => {
+const FormBuilderPage = ({ existingForm }) => {
   const { api } = useAuth();
   const navigate = useNavigate();
+  const { formId } = useParams();
 
   const [selectedTable, setSelectedTable] = useState(null);
   const [formQuestions, setFormQuestions] = useState([]);
@@ -19,6 +20,19 @@ const FormBuilderPage = () => {
   const [logicRules, setLogicRules] = useState([]);
   const [isLogicModalOpen, setIsLogicModalOpen] = useState(false);
   const [logicTargetIndex, setLogicTargetIndex] = useState(null);
+
+  useEffect(() => {
+    if (existingForm) {
+      setFormName(existingForm.name);
+      setFormQuestions(existingForm.questions);
+      setLogicRules(existingForm.logic);
+      setSelectedTable({
+        id: existingForm.airtableTableId,
+        baseId: existingForm.airtableBaseId,
+        name: 'Loaded Table'
+      });
+    }
+  }, [existingForm]);
 
   const handleTableSelect = (table) => {
     setSelectedTable(table);
@@ -78,7 +92,11 @@ const FormBuilderPage = () => {
     };
 
     try {
-      await api.post('/api/forms', formData);
+      if (formId) {
+        await api.put(`/api/forms/${formId}`, formData);
+      } else {
+        await api.post('/api/forms', formData);
+      }
       alert("Form saved successfully!");
       navigate('/dashboard');
     } catch (error) {
