@@ -1,7 +1,7 @@
 import React from 'react';
 
 // This is the only URL we should be using.
-const AIRTABLE_AUTH_URL = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001'}/auth/airtable`;
+const AIRTABLE_AUTH_URL = `http://localhost:5001/auth/airtable`;
 
 const HomePage = () => {
   const handleLogin = () => {
