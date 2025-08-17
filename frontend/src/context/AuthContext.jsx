@@ -5,7 +5,7 @@ import axios from 'axios';
 const AuthContext = createContext(null);
 
 const api = axios.create({
-  baseURL: 'http://localhost:5001',
+  baseURL: '/', // Use a relative path
   withCredentials: true,
 });
 
