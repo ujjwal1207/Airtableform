@@ -18,9 +18,9 @@ exports.handleCallback = (req, res) => {
   // Set the token in a secure, HTTP-only cookie.
 res.cookie('jwt', token, {
     httpOnly: true,
-    secure: true, // Always secure in production
+    secure: process.env.NODE_ENV === 'production',
     maxAge: 24 * 60 * 60 * 1000, // 1 day
-    sameSite: 'none', // Explicitly set for cross-domain
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // Add this line
 });
 
   // --- THIS IS THE FIX ---
