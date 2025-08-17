@@ -21,6 +21,7 @@ router.get('/bases', protect, airtableController.getBases);
  */
 router.get('/tables/:baseId', protect, airtableController.getTables);
 
+
 /**
  * @route   GET /api/airtable/fields/:baseId/:tableId
  * @desc    Get a list of fields from a specific table
