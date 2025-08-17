@@ -15,9 +15,10 @@ const app = express();
 const PORT = process.env.PORT || 5001;
 
 app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    origin: process.env.FRONTEND_URL, // Use the environment variable
     credentials: true,
 }));
+
 
 app.use(express.json());
 app.use(cookieParser());
@@ -25,11 +26,13 @@ app.use(cookieParser());
 // --- 2. CONFIGURE SESSION MIDDLEWARE ---
 // This must come BEFORE passport.session()
 app.use(session({
-  secret: process.env.JWT_SECRET, // A secret to sign the session ID cookie
+  secret: process.env.JWT_SECRET,
   resave: false,
-  saveUninitialized: false, 
-  cookie: { 
-    secure: process.env.NODE_ENV === 'production' // Use secure cookies in production
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true, // Remains true
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // Add this line
   }
 }));
 

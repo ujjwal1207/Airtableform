@@ -28,4 +28,12 @@ router.get('/tables/:baseId', protect, airtableController.getTables);
  */
 router.get('/fields/:baseId/:tableId', protect, airtableController.getFields);
 
+/**
+ * @route   GET /api/airtable/names/:baseId/:tableId
+ * @desc    Get the names of a specific base and table
+ * @access  Private
+ */
+router.get('/names/:baseId/:tableId', protect, airtableController.getBaseAndTableNames);
+
+
 module.exports = router;

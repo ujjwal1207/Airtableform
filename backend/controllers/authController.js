@@ -16,11 +16,12 @@ exports.handleCallback = (req, res) => {
   const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1d' });
 
   // Set the token in a secure, HTTP-only cookie.
-  res.cookie('jwt', token, {
+res.cookie('jwt', token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    maxAge: 24 * 60 * 60 * 1000, // 1 day in milliseconds
-  });
+    maxAge: 24 * 60 * 60 * 1000, // 1 day
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // Add this line
+});
 
   // --- THIS IS THE FIX ---
   // We explicitly redirect to the /dashboard page on the frontend.

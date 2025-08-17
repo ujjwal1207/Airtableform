@@ -1,17 +1,10 @@
 // controllers/airtableController.js
 const axios = require('axios');
 
-/**
- * Helper function to create the authorization headers for Airtable API calls.
- * It uses the accessToken stored with the logged-in user.
- */
 const getAirtableHeaders = (req) => ({
     'Authorization': `Bearer ${req.user.accessToken}`,
 });
 
-/**
- * Proxies a request to fetch the user's Airtable bases.
- */
 exports.getBases = async (req, res) => {
     try {
         const response = await axios.get('https://api.airtable.com/v0/meta/bases', {
@@ -24,9 +17,6 @@ exports.getBases = async (req, res) => {
     }
 };
 
-/**
- * Proxies a request to fetch the tables within a specific Airtable base.
- */
 exports.getTables = async (req, res) => {
     try {
         const { baseId } = req.params;
@@ -41,32 +31,52 @@ exports.getTables = async (req, res) => {
     }
 };
 
-/**
- * Proxies a request to fetch the fields from a specific Airtable table.
- */
 exports.getFields = async (req, res) => {
      try {
         const { baseId, tableId } = req.params;
-        // The Airtable API to get a table's schema is the same as getting all tables.
         const url = `https://api.airtable.com/v0/meta/bases/${baseId}/tables`;
         const response = await axios.get(url, {
             headers: getAirtableHeaders(req),
         });
-
-        // We find the specific table the user requested from the list.
         const table = response.data.tables.find(t => t.id === tableId);
+        if (!table) {
+            return res.status(404).json({ message: 'Table not found' });
+        }
+        const supportedTypes = ['singleLineText', 'multilineText', 'singleSelect', 'multipleSelects', 'multipleAttachments'];
+        const supportedFields = table.fields.filter(field => supportedTypes.includes(field.type));
+        res.status(200).json({ fields: supportedFields });
+    } catch (error) {
+        console.error("Get Airtable fields error:", error);
+        res.status(500).json({ message: 'Error fetching Airtable fields', error: error.message });
+    }
+};
+
+// Add this new function
+exports.getBaseAndTableNames = async (req, res) => {
+    try {
+        const { baseId, tableId } = req.params;
+        const headers = getAirtableHeaders(req);
+
+        // Fetch all bases to find the base name
+        const basesResponse = await axios.get('https://api.airtable.com/v0/meta/bases', { headers });
+        const base = basesResponse.data.bases.find(b => b.id === baseId);
+
+        if (!base) {
+            return res.status(404).json({ message: 'Base not found' });
+        }
+
+        // Fetch tables for that base to find the table name
+        const tablesUrl = `https://api.airtable.com/v0/meta/bases/${baseId}/tables`;
+        const tablesResponse = await axios.get(tablesUrl, { headers });
+        const table = tablesResponse.data.tables.find(t => t.id === tableId);
 
         if (!table) {
             return res.status(404).json({ message: 'Table not found' });
         }
 
-        // We only return fields that our application supports for form questions.
-        const supportedTypes = ['singleLineText', 'multilineText', 'singleSelect', 'multipleSelects', 'multipleAttachments'];
-        const supportedFields = table.fields.filter(field => supportedTypes.includes(field.type));
-
-        res.status(200).json({ fields: supportedFields });
+        res.status(200).json({ baseName: base.name, tableName: table.name });
     } catch (error) {
-        console.error("Get Airtable fields error:", error);
-        res.status(500).json({ message: 'Error fetching Airtable fields', error: error.message });
+        console.error("Get base and table names error:", error);
+        res.status(500).json({ message: 'Error fetching names', error: error.message });
     }
 };

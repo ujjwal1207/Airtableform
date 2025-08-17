@@ -4,31 +4,25 @@ import axios from 'axios';
 // Create a new context
 const AuthContext = createContext(null);
 
-// Create an Axios instance for our API calls
-// This ensures we always send cookies with our requests
 const api = axios.create({
-  baseURL: 'http://localhost:5001', // Your backend URL
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001',
   withCredentials: true,
 });
 
 // Create the AuthProvider component
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true); // Start with loading true
+  const [loading, setLoading] = useState(true); 
 
   useEffect(() => {
-    // This function runs when the app first loads
     const checkLoggedIn = async () => {
       try {
-        // Make a request to the backend to get the current user
         const response = await api.get('/auth/user');
         setUser(response.data);
       } catch (error) {
-        // If there's an error (like a 401), it means the user is not logged in
         console.log('User not authenticated');
         setUser(null);
       } finally {
-        // We're done loading, whether we found a user or not
         setLoading(false);
       }
     };
@@ -45,7 +39,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // The value provided to all children components
   const value = {
     user,
     loading,
@@ -60,7 +53,6 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-// Create a custom hook to easily use the auth context
 export const useAuth = () => {
   return useContext(AuthContext);
 };

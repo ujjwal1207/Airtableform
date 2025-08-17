@@ -1,27 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 
-const AirtableSelector = ({ onTableSelect }) => {
+const AirtableSelector = ({ onTableSelect, initialSelection }) => {
   const { api } = useAuth();
   const [bases, setBases] = useState([]);
   const [tables, setTables] = useState([]);
   const [selectedBaseId, setSelectedBaseId] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
+  const [selectedTableId, setSelectedTableId] = useState('');
+  const [isLoadingBases, setIsLoadingBases] = useState(true);
+  const [isLoadingTables, setIsLoadingTables] = useState(false);
 
-  // Fetch bases when the component mounts
+  // Fetch all bases when the component mounts
   useEffect(() => {
     const fetchBases = async () => {
       try {
         const response = await api.get('/api/airtable/bases');
         setBases(response.data.bases);
+        if (initialSelection) {
+          setSelectedBaseId(initialSelection.baseId);
+        }
       } catch (error) {
         console.error("Failed to fetch bases:", error);
       } finally {
-        setIsLoading(false);
+        setIsLoadingBases(false);
       }
     };
     fetchBases();
-  }, [api]);
+  }, [api, initialSelection]);
 
   // Fetch tables when a base is selected
   useEffect(() => {
@@ -29,29 +34,39 @@ const AirtableSelector = ({ onTableSelect }) => {
       setTables([]);
       onTableSelect(null);
       return;
-    };
+    }
 
     const fetchTables = async () => {
-      setIsLoading(true);
+      setIsLoadingTables(true);
       try {
         const response = await api.get(`/api/airtable/tables/${selectedBaseId}`);
         setTables(response.data.tables);
+        if (initialSelection && selectedBaseId === initialSelection.baseId) {
+          setSelectedTableId(initialSelection.tableId);
+          // Automatically trigger onTableSelect for the initial load
+          const selectedTable = response.data.tables.find(t => t.id === initialSelection.tableId);
+          if (selectedTable) {
+            onTableSelect({ ...selectedTable, baseId: selectedBaseId });
+          }
+        }
       } catch (error) {
         console.error("Failed to fetch tables:", error);
       } finally {
-        setIsLoading(false);
+        setIsLoadingTables(false);
       }
     };
     fetchTables();
-  }, [selectedBaseId, api]);
+  }, [selectedBaseId, api, initialSelection, onTableSelect]);
 
   const handleBaseChange = (e) => {
     setSelectedBaseId(e.target.value);
+    setSelectedTableId(''); // Reset table selection
     onTableSelect(null);
   };
 
   const handleTableChange = (e) => {
     const tableId = e.target.value;
+    setSelectedTableId(tableId);
     if (tableId) {
       const selectedTable = tables.find(t => t.id === tableId);
       onTableSelect({ ...selectedTable, baseId: selectedBaseId });
@@ -68,10 +83,10 @@ const AirtableSelector = ({ onTableSelect }) => {
           id="base-select"
           value={selectedBaseId}
           onChange={handleBaseChange}
-          disabled={isLoading}
+          disabled={isLoadingBases}
           className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
         >
-          <option value="">{isLoading ? 'Loading bases...' : 'Choose a base'}</option>
+          <option value="">{isLoadingBases ? 'Loading bases...' : 'Choose a base'}</option>
           {bases.map(base => (
             <option key={base.id} value={base.id}>{base.name}</option>
           ))}
@@ -82,11 +97,12 @@ const AirtableSelector = ({ onTableSelect }) => {
           <label htmlFor="table-select" className="block text-sm font-medium text-gray-700 mb-1">2. Select a Table</label>
           <select
             id="table-select"
+            value={selectedTableId}
             onChange={handleTableChange}
-            disabled={isLoading || tables.length === 0}
+            disabled={isLoadingTables || tables.length === 0}
             className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
           >
-            <option value="">{isLoading ? 'Loading tables...' : 'Choose a table'}</option>
+            <option value="">{isLoadingTables ? 'Loading tables...' : 'Choose a table'}</option>
             {tables.map(table => (
               <option key={table.id} value={table.id}>{table.name}</option>
             ))}
