@@ -14,6 +14,8 @@ const airtableRoutes = require('./routes/airtableRoutes.js')
 const app = express()
 const PORT = process.env.PORT || 5001
 
+app.set('trust proxy', 1);
+
 app.use(
   cors({
     origin: process.env.FRONTEND_URL, // Use the environment variable
@@ -32,9 +34,9 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: process.env.NODE_ENV === 'production',
-      httpOnly: true, // Remains true
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax' // Add this line
+      secure: true, // Explicitly true for HTTPS
+      httpOnly: true,
+      sameSite: 'none' // Explicitly 'none' for cross-domain
     }
   })
 )
